@@ -1,0 +1,26 @@
+LANGKAH UNTUK MEMPERBAIKI ERROR:
+
+1. Buka phpMyAdmin (http://localhost/phpmyadmin)
+2. Pilih database "reservasi_ruangan"
+3. Klik tab "SQL"
+4. Copy-paste kode berikut:
+
+---
+ALTER TABLE users 
+ADD COLUMN profile_picture VARCHAR(255) NULL DEFAULT NULL 
+AFTER role;
+---
+
+5. Klik "Go" atau "Jalankan"
+6. Refresh halaman profil di aplikasi Anda
+
+SELESAI! Sekarang kolom profile_picture sudah ditambahkan ke tabel users.
+
+Kode di profil.php sudah diupdate untuk:
+- Mengecek apakah kolom profile_picture ada
+- Menangani upload gambar dengan aman
+- Menampilkan preview gambar
+- Mendukung drag & drop
+- Menyimpan path gambar ke database
+
+Fitur Upload Profil sudah siap digunakan!
