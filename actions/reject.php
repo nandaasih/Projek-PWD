@@ -47,23 +47,8 @@ if ($q) {
 				$admin_contact_q = mysqli_query($conn, "SELECT fullname, email FROM users WHERE role='admin' LIMIT 1");
 				$admin_contact = $admin_contact_q ? mysqli_fetch_assoc($admin_contact_q) : null;
 				$admin_email = $admin_contact['email'] ?? '';
-			$subject = "Reservasi Anda ditolak - " . $room . " (" . date('d M Y', strtotime($date)) . ")";
-			$body = "Halo " . $userName . ",\n\n";
-			$body .= "Reservasi Anda untuk ruangan '" . $room . "' pada " . date('d M Y', strtotime($date)) . " telah ditolak oleh admin." . "\n\n";
-			if (!empty($reason)) {
-				$body .= "Alasan penolakan:\n" . $reason . "\n\n";
-			}
-				$body .= "Anda dapat melihat detail reservasi di: " . $viewUrl . "\n\n";
-				$body .= "Lihat daftar ruangan: " . $roomListUrl . "\n\n";
-				if (!empty($admin_email) && filter_var($admin_email, FILTER_VALIDATE_EMAIL)) {
-					$body .= "Kontak admin: " . $admin_email . "\n\n";
-				} else {
-					$body .= "Jika Anda memerlukan bantuan lebih lanjut, silakan hubungi administrator." . "\n\n";
-				}
-				$body .= "Salam,\nTim Reservasi";
-
-			require_once __DIR__ . '/../includes/mailer.php';
-			send_mail($to, $subject, $body, false);
+			// Email notification disabled - only web notification sent
+			// User will see notification in the web application instead
 		}
 	}
 }

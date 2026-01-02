@@ -65,17 +65,10 @@ require __DIR__ . '/../templates/header.php';
 <section class="admin-dashboard">
   <div class="dashboard-wrapper">
     <div class="dashboard-grid">
-      <aside class="sidebar">
-        <div class="brand">🏢 Admin — <span style="color:#0b63d7">Dashboard</span></div>
-        <nav class="nav">
-          <a href="<?= base_path('/admin/index.php') ?>" class="active"><span class="icon">🏠</span> Dashboard</a>
-          <a href="<?= base_path('/admin/reservasi_list.php') ?>"><span class="icon">📅</span> Reservasi</a>
-          <a href="<?= base_path('/admin/ruangan_list.php') ?>"><span class="icon">🚪</span> Ruangan</a>
-          <a href="<?= base_path('/admin/user_list.php') ?>"><span class="icon">👥</span> Pengguna</a>
-          <a href="<?= base_path('/admin/profil.php') ?>"><span class="icon">👤</span> Profil</a>
-          <a href="<?= base_path('/actions/logout.php') ?>"><span class="icon">🔓</span> Logout</a>
-        </nav>
-      </aside>
+      <?php 
+        $sidebar_type = 'admin';
+        require __DIR__ . '/../templates/sidebar.php'; 
+      ?>
       <div class="dashboard-main">
     <!-- Hero Section -->
     <div class="admin-hero">

@@ -48,17 +48,10 @@ require __DIR__ . '/../templates/header.php';
 <section class="user-dashboard">
   <div class="dashboard-wrapper">
     <div class="dashboard-grid">
-      <aside class="sidebar">
-        <div class="brand">🏢 Reservasi — <span style="color:#0b63d7">Dashboard</span></div>
-        <nav class="nav">
-          <a href="<?= base_path('/user/dashboard.php') ?>" class="active"><span class="icon">🏠</span> Dashboard</a>
-          <a href="<?= base_path('/user/reservasi_add.php') ?>"><span class="icon">📅</span> Buat Reservasi</a>
-          <a href="<?= base_path('/user/ruangan_list.php') ?>"><span class="icon">🚪</span> Ruangan</a>
-          <a href="<?= base_path('/user/reservasi_history.php') ?>"><span class="icon">📜</span> Riwayat</a>
-          <a href="<?= base_path('/user/profil.php') ?>"><span class="icon">👤</span> Profil</a>
-          <a href="<?= base_path('/actions/logout.php') ?>"><span class="icon">🔓</span> Logout</a>
-        </nav>
-      </aside>
+      <?php 
+        $sidebar_type = 'user';
+        require __DIR__ . '/../templates/sidebar.php'; 
+      ?>
       <div class="dashboard-main">
     
     <!-- Header Section with Avatar and Welcome -->
@@ -77,26 +70,6 @@ require __DIR__ . '/../templates/header.php';
             <p class="header-subtitle">Kelola dan pantau semua reservasi ruangan Anda</p>
           </div>
         </div>
-        <div class="header-right">
-          <a href="<?= base_path('/user/profil_view.php') ?>" class="header-link">Lihat Profil</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hero / Booking CTA (inspired by MySantika style) -->
-    <div class="user-hero">
-      <div class="hero-inner">
-        <div class="hero-left">
-          <h2 class="hero-title">Pesan Ruangan dengan Cepat</h2>
-          <p class="hero-sub">Cari dan pesan ruangan cocok untuk meeting, pelatihan, atau acara Anda. Sistem kami menampilkan ketersediaan real-time.</p>
-
-          <div class="hero-cta">
-            <a href="<?= base_path('/user/reservasi_add.php') ?>" class="btn btn-primary hero-btn">Buat Reservasi</a>
-            <a href="<?= base_path('/user/cek_ketersediaan.php') ?>" class="btn hero-btn-outline">Cek Ketersediaan</a>
-          </div>
-        </div>
-
-        <!-- hero-right removed: room search intentionally disabled -->
       </div>
     </div>
 

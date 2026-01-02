@@ -72,7 +72,7 @@ if (!empty($_SESSION['user_id'])) {
           </li>
 
           <li class="nav-item">
-            <a href="<?php echo $role === 'admin' ? base_path('/admin/profil.php') : base_path('/user/profil.php'); ?>" class="nav-link nav-user-link">
+            <a href="<?php echo $role === 'admin' ? base_path('/admin/profil.php') : base_path('/user/profil_view.php'); ?>" class="nav-link nav-user-link">
               <div class="nav-user">
                 <?php if (!empty($nav_profile_pic_url)): ?>
                   <img src="<?= $nav_profile_pic_url ?>" alt="<?= e($_SESSION['name'] ?? 'User') ?>" class="nav-avatar">
