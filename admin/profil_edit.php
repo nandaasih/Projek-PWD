@@ -154,147 +154,119 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $title = "Edit Profil Admin";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 
 $profile_pic_url = $user['profile_picture'] ? base_path('/' . $user['profile_picture']) : '';
 $initials = strtoupper(substr($user['fullname'] ?? 'U', 0, 1));
 ?>
 
-<section class="profile-edit-section">
-  <div class="profile-edit-wrapper">
-    
-    <!-- Back Button -->
-    <a href="<?= base_path('/admin/profil.php') ?>" class="back-link">
-      <span>← Kembali ke Profil Admin</span>
-    </a>
-
-    <!-- Page Title -->
-    <div class="edit-page-header">
-      <h1>Edit Profil Admin</h1>
-      <p>Perbarui informasi akun dan foto profil Anda</p>
-    </div>
-
+<div style="max-width: 900px; margin: 0 auto;">
     <!-- Messages -->
     <?php if (!empty($message)): ?>
-      <div class="alert alert-success">
-        <span class="alert-icon">✓</span>
-        <?= $message ?>
+      <div style="padding: 14px 16px; background: #d1fae5; color: #065f46; border-radius: 8px; border: 1px solid #6ee7b7; margin-bottom: 20px;">
+        ✓ <?= e($message) ?>
       </div>
     <?php endif; ?>
 
     <?php if (!empty($error)): ?>
-      <div class="alert alert-error">
-        <span class="alert-icon">!</span>
-        <?= $error ?>
+      <div style="padding: 14px 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px;">
+        ✗ <?= e($error) ?>
       </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="edit-form">
+    <!-- Profile Header (Like profil.php) -->
+    <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; display: flex; gap: 24px; align-items: flex-start;">
+      <!-- Avatar -->
+      <div style="flex: 0 0 auto;">
+        <?php if (!empty($profile_pic_url)): ?>
+          <img id="preview" src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" style="width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 3px solid #e5e7eb;">
+        <?php else: ?>
+          <div id="preview" style="width: 140px; height: 140px; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 56px; font-weight: bold;">
+            <?= $initials ?>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <!-- Profile Info -->
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <h1 style="margin: 0 0 4px 0; font-size: 28px; font-weight: 700; color: #1f2937;">✏️ <?= e($user['fullname'] ?? 'Admin') ?></h1>
+        <p style="margin: 0 0 2px 0; color: #6b7280; font-size: 15px;">Administrator</p>
+        <p style="margin: 0 0 16px 0; color: #9ca3af; font-size: 13px;">
+          Terdaftar sejak <strong><?= date('d M Y', strtotime($user['created_at'] ?? date('Y-m-d H:i:s'))) ?></strong>
+        </p>
+        <a href="<?= base_path('/admin/profil.php') ?>" style="display: inline-block; padding: 8px 16px; background: #6b7280; color: white; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; width: fit-content;">
+          👁️ Lihat Profil
+        </a>
+      </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 24px;">
       <?= csrf_field() ?>
       
-      <!-- Profile Picture Card -->
-      <div class="edit-card">
-        <h2 class="card-title">Foto Profil</h2>
-          <p class="card-subtitle">Ubah atau hapus foto profil Anda</p>
+      <!-- Photo Upload Card -->
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h2 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #1f2937;">📷 Ubah Foto Profil</h2>
+        <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 13px;">Pilih foto baru untuk profil Anda</p>
 
-        <div class="pic-section">
-          <div class="pic-preview">
-            <?php if (!empty($profile_pic_url)): ?>
-              <img src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" class="preview-img">
-            <?php else: ?>
-              <div class="preview-empty">
-                <p>Belum ada foto</p>
-              </div>
-            <?php endif; ?>
-          </div>
-
-          <div class="pic-upload">
-            <input type="file" id="profile_picture" name="profile_picture" class="file-input" accept="image/*">
-            <label for="profile_picture" class="upload-label">
-              <div class="upload-content">
-                <p class="upload-title">Klik untuk upload</p>
-                <p class="upload-hint">atau drag & drop</p>
-              </div>
-            </label>
-            <p class="upload-info">JPG, PNG, GIF, WebP (Max 5MB)</p>
-          </div>
+        <div>
+          <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
+          <button type="button" onclick="document.getElementById('profile_picture').click()" style="padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; margin-bottom: 12px;">
+            🖼️ Pilih Foto
+          </button>
+          <p style="margin: 0; color: #6b7280; font-size: 12px;">JPG, PNG, GIF, WebP (Max 5MB)</p>
         </div>
       </div>
 
       <!-- Personal Information -->
-      <div class="edit-card">
-        <h2 class="card-title">Informasi Pribadi</h2>
-        <p class="card-subtitle">Perbarui data diri Anda</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h2 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 700; color: #1f2937;">👤 Informasi Pribadi</h2>
 
-        <div class="form-group">
-          <label for="fullname" class="form-label">Nama Lengkap <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <input type="text" id="fullname" name="fullname" class="form-input" value="<?= e($user['fullname'] ?? '') ?>" required minlength="3">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Nama Lengkap <span style="color: #ef4444;">*</span></label>
+            <input type="text" name="fullname" value="<?= e($user['fullname'] ?? '') ?>" required minlength="3" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Nama lengkap">
           </div>
-          <p class="form-hint">Gunakan nama lengkap yang sesungguhnya</p>
-        </div>
 
-        <div class="form-group">
-          <label for="email" class="form-label">Email <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <input type="email" id="email" name="email" class="form-input" value="<?= e($user['email'] ?? '') ?>" required>
-          </div>
-          <p class="form-hint">Email digunakan untuk login dan notifikasi penting</p>
-        </div>
-
-        <div class="info-boxes">
-          <div class="info-box">
-            <span class="box-label">🆔 User ID</span>
-            <span class="box-value">#<?= (int)$user['id'] ?></span>
-          </div>
-          <div class="info-box">
-            <span class="box-label">👨‍💼 Role</span>
-            <span class="box-value">Admin</span>
-          </div>
-          <div class="info-box">
-            <span class="box-label">📅 Terdaftar</span>
-            <span class="box-value"><?= date('d M Y', strtotime($user['created_at'] ?? now())) ?></span>
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Email <span style="color: #ef4444;">*</span></label>
+            <input type="email" name="email" value="<?= e($user['email'] ?? '') ?>" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Email">
           </div>
         </div>
       </div>
 
       <!-- Password Change -->
-      <div class="edit-card">
-        <h2 class="card-title">Ubah Password</h2>
-        <p class="card-subtitle">Biarkan kosong jika tidak ingin mengubah</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h2 style="margin: 0 0 20px 0; font-size: 16px; font-weight: 700; color: #1f2937;">🔐 Ubah Password</h2>
 
-        <div class="form-group">
-          <label for="current_password" class="form-label">Password Saat Ini</label>
-          <div class="input-wrapper">
-            <input type="password" id="current_password" name="current_password" class="form-input" placeholder="Masukkan password saat ini jika ingin mengganti">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Password Saat Ini</label>
+            <input type="password" name="current_password" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Masukkan password saat ini jika ingin mengganti">
           </div>
-          <p class="form-hint">Diperlukan saat ingin mengganti password</p>
+
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Password Baru</label>
+            <input type="password" name="password" minlength="6" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Minimal 6 karakter">
+          </div>
+
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Konfirmasi Password</label>
+            <input type="password" name="password_confirm" minlength="6" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Ulangi password baru">
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="password" class="form-label">Password Baru</label>
-          <div class="input-wrapper">
-            <input type="password" id="password" name="password" class="form-input" minlength="6" placeholder="Minimal 6 karakter">
-          </div>
-          <p class="form-hint">Gunakan kombinasi huruf besar, kecil, dan angka</p>
-        </div>
-
-        <div class="form-group">
-          <label for="password_confirm" class="form-label">Konfirmasi Password</label>
-          <div class="input-wrapper">
-            <input type="password" id="password_confirm" name="password_confirm" class="form-input" minlength="6" placeholder="Ulangi password baru">
-          </div>
-          <p class="form-hint">Pastikan kedua password sama</p>
+        <div style="margin-top: 16px; padding: 12px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px;">
+          <p style="margin: 0; font-size: 13px; color: #92400e;">⚠️ Biarkan kosong jika tidak ingin mengubah password</p>
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-large">
-          <span>💾</span> Simpan Perubahan
+      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <button type="submit" style="padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; flex: 1;">
+          💾 Simpan Perubahan
         </button>
-        <a href="<?= base_path('/admin/profil.php') ?>" class="btn btn-secondary btn-large">
-          <span>❌</span> Batal
+        <a href="<?= base_path('/admin/profil.php') ?>" style="padding: 14px 32px; background: #e5e7eb; color: #1f2937; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+          ❌ Batal
         </a>
       </div>
     </form>
@@ -356,4 +328,7 @@ form.addEventListener('submit', (e) => {
 });
 </script>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

@@ -67,4 +67,7 @@ if ($q) {
 		}
 	}
 
+// Set success message
+flash_set('success', 'Reservasi berhasil ditolak! Notifikasi penolakan telah dikirim ke pemesan.');
+
 redirect('/admin/reservasi_list.php');

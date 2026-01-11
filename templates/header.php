@@ -33,7 +33,14 @@ if (!empty($_SESSION['user_id'])) {
   <script defer src="<?= base_path('/assets/script.js') ?>"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
+<?php
+// detect admin pages to avoid rendering top navbar and instead show sidebar layout
+$current_path_h = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$is_admin_page = (bool) preg_match('#/admin/#', $current_path_h);
+?>
+<body<?= $is_admin_page ? ' class="admin-panel"' : '' ?>>
+
+<?php if (!$is_admin_page): ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
@@ -49,9 +56,6 @@ if (!empty($_SESSION['user_id'])) {
         <li class="nav-item">
           <a class="nav-link" href="<?= base_path('/user/ruangan_list.php') ?>">Ruangan</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="<?= base_path('/chat.php') ?>">Chat Admin</a>
-        </li>
         <?php if (!empty($_SESSION['user_id'])): ?>
           <?php
             $role = $_SESSION['role'] ?? 'user';
@@ -61,6 +65,12 @@ if (!empty($_SESSION['user_id'])) {
               $notif_count = notif_unread_count($conn, $uid);
             }
             $notif_link = $role === 'admin' ? base_path('/admin/index.php') : base_path('/user/dashboard.php');
+
+            // Hide header nav avatar on user pages to avoid duplicate avatars (sidebar shows profile)
+            $show_nav_avatar = true;
+            if (preg_match('#/user/#', $current_path_h)) {
+              $show_nav_avatar = false;
+            }
           ?>
           <li class="nav-item">
             <a class="nav-link position-relative" href="<?= $notif_link ?>" title="Notifikasi">
@@ -71,6 +81,7 @@ if (!empty($_SESSION['user_id'])) {
             </a>
           </li>
 
+          <?php if ($show_nav_avatar): ?>
           <li class="nav-item">
             <a href="<?php echo $role === 'admin' ? base_path('/admin/profil.php') : base_path('/user/profil_view.php'); ?>" class="nav-link nav-user-link">
               <div class="nav-user">
@@ -83,8 +94,9 @@ if (!empty($_SESSION['user_id'])) {
               </div>
             </a>
           </li>
+          <?php endif; ?>
           <li class="nav-item">
-            <a href="<?= base_path('/actions/logout.php') ?>" class="nav-link">Logout</a>
+            <a href="<?= base_path('/confirm_logout.php') ?>" class="nav-link">Logout</a>
           </li>
         <?php else: ?>
           <li class="nav-item">
@@ -100,3 +112,15 @@ if (!empty($_SESSION['user_id'])) {
 </nav>
 
 <main class="main-container">
+
+<?php else: ?>
+
+  <!-- Admin layout: sidebar + content wrapper (header/navbar hidden) -->
+  <div class="main-layout">
+    <div class="sidebar-wrapper">
+      <?php $sidebar_type = $sidebar_type ?? 'admin'; require __DIR__ . '/sidebar.php'; ?>
+    </div>
+    <div class="content-wrapper">
+      <main class="main-container">
+
+<?php endif; ?>

@@ -9,7 +9,7 @@ $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM ruangan WHERE id=$id"
 if (!$r) redirect('/admin/ruangan_list.php');
 
 $title="Edit Ruangan";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 ?>
 <h2 class="h">Edit Ruangan</h2>
 <form method="post" action="<?= base_path('/actions/ruangan_update.php') ?>">
@@ -26,4 +26,7 @@ require __DIR__ . '/../templates/header.php';
   </select>
   <p style="margin-top:12px"><button class="btn ok" type="submit">Update</button></p>
 </form>
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

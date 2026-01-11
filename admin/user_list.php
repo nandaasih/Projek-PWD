@@ -13,7 +13,7 @@ require_once __DIR__ . '/../includes/helpers.php';
  }
 
 $title="Daftar Pengguna";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 ?>
 
 <section class="admin-section">
@@ -96,4 +96,7 @@ require __DIR__ . '/../templates/header.php';
   <?php endif; ?>
 </section>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

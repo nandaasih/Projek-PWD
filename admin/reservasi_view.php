@@ -24,7 +24,7 @@ if (!$res) {
 }
 
 $title = "Detail Reservasi (Admin)";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 ?>
 
 <section class="container" style="margin-top:24px;max-width:920px">
@@ -52,14 +52,10 @@ require __DIR__ . '/../templates/header.php';
         ?>
         <div style="display:flex;gap:8px">
           <?php if ($res['status'] === 'pending'): ?>
-            <form method="POST" action="<?= base_path('/admin/approve.php') ?>" style="display:inline;">
-              <?= csrf_field() ?>
-              <input type="hidden" name="id" value="<?= (int)$res['id'] ?>">
-              <button type="submit" class="btn btn-primary">✅ Approve</button>
-            </form>
-            <a href="<?= base_path('/admin/reject.php?id=') ?><?= (int)$res['id'] ?>" class="btn btn-danger">❌ Reject</a>
+            <button onclick="confirmApprove(<?= (int)$res['id'] ?>)" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">✅ Approve</button>
+            <a href="<?= base_path('/admin/reject.php?id=') ?><?= (int)$res['id'] ?>" onclick="return confirm('Yakin ingin menolak reservasi ini?')" style="padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block;">❌ Reject</a>
           <?php else: ?>
-            <a href="<?= base_path('/admin/reservasi_list.php') ?>" class="btn btn-secondary">← Kembali</a>
+            <a href="<?= base_path('/admin/reservasi_list.php') ?>" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block;">← Kembali</a>
           <?php endif; ?>
         </div>
       </div>
@@ -81,4 +77,32 @@ require __DIR__ . '/../templates/header.php';
   </div>
 </section>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>
+
+<script>
+function confirmApprove(id) {
+  if (confirm('Yakin ingin menyetujui reservasi ini?')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_path('/admin/approve.php') ?>';
+    
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'csrf_token';
+    tokenInput.value = window.CSRF_TOKEN || '';
+    
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = id;
+    
+    form.appendChild(tokenInput);
+    form.appendChild(idInput);
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>

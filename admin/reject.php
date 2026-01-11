@@ -14,7 +14,7 @@ $res = mysqli_fetch_assoc(mysqli_query($conn, "SELECT r.*, u.fullname, ru.nama A
 if (!$res) redirect('/admin/reservasi_list.php');
 
 $title = "Reject Reservasi #$id";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 ?>
 
 <h2 class="h">Tolak Reservasi</h2>
@@ -37,4 +37,7 @@ require __DIR__ . '/../templates/header.php';
   </form>
 </div>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

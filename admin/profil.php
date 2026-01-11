@@ -21,7 +21,7 @@ if (mysqli_num_rows($check_column) > 0) {
 }
 
 $title = "Profil Admin";
-require __DIR__ . '/../templates/header.php';
+ob_start();
 
 $profile_pic_url = $user['profile_picture'] ? base_path('/' . $user['profile_picture']) : '';
 $initials = strtoupper(substr($user['fullname'] ?? 'U', 0, 1));
@@ -96,4 +96,7 @@ $flash_error = flash_get('error');
   </div>
 </section>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

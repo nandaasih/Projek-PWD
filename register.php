@@ -3,13 +3,25 @@ require_once __DIR__ . '/includes/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 
 $title = "Register";
-require __DIR__ . '/templates/header.php';
 $err = $_GET['error'] ?? '';
 ?>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= e($title) ?> - Reservasi Ruangan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="<?= base_path('/assets/styles.css') ?>">
+  <script defer src="<?= base_path('/assets/script.js') ?>"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
 <div class="auth-wrapper">
   <div class="auth-card">
     <div class="auth-logo">✦</div>
-    <h2>Daftar Akun Baru</h2>
+    <h2>Selamat Datang di Reservasi Ruangan Rapat</h2>
+    <p style="color: #6b7280; text-align: center; margin: 12px 0 20px 0; font-size: 14px;">Buat akun baru untuk mulai membuat reservasi</p>
     <?php if ($err): ?><div class="error"><?= e($err) ?></div><?php endif; ?>
 
     <form class="auth-form" method="post" action="<?= base_path('/actions/register_post.php') ?>">
@@ -43,5 +55,5 @@ $err = $_GET['error'] ?? '';
     </form>
   </div>
 </div>
-
-<?php require __DIR__ . '/templates/footer.php'; ?>
+</body>
+</html>

@@ -73,4 +73,7 @@ if ($user_id_for_notif > 0) {
   }
 }
 
+// Set success message
+flash_set('success', 'Reservasi berhasil disetujui! Notifikasi telah dikirim ke pemesan.');
+
 redirect('/admin/reservasi_list.php');

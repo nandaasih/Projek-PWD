@@ -29,7 +29,7 @@ $labels = array_map(function($it){ return date('d M', strtotime($it['date'])); }
 $counts = array_map(function($it){ return (int)$it['count']; }, $daily);
 
 $title = 'Statistik Pengguna';
-require __DIR__ . '/../templates/header.php';
+ob_start();
 ?>
 
 <section class="admin-section">
@@ -78,4 +78,7 @@ new Chart(ctx, {
 });
 </script>
 
-<?php require __DIR__ . '/../templates/footer.php';
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

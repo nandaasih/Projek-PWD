@@ -18,7 +18,9 @@ if (!$rooms) {
 $ruangan_list = mysqli_fetch_all($rooms, MYSQLI_ASSOC);
 
 $title = "Buat Reservasi Baru";
-require __DIR__ . '/../templates/header.php';
+
+// Start output buffering to capture HTML content
+ob_start();
 $err = $_GET['error'] ?? '';
 
 // Get today date
@@ -26,941 +28,147 @@ $today = date('Y-m-d');
 $min_date = date('Y-m-d', strtotime('+1 day'));
 ?>
 
-<section class="reservasi-add-section">
-  <div class="add-wrapper">
-    
-    <!-- Back Button -->
-    <a href="<?= base_path('/user/dashboard.php') ?>" class="back-link">
-      <span>← Kembali ke Dashboard</span>
-    </a>
-
+<div class="reservasi-add-wrapper">
     <!-- Page Header -->
-    <div class="add-header">
-      <h1>📅 Buat Reservasi Baru</h1>
-      <p>Pesan ruangan untuk kebutuhan Anda</p>
+    <div style="margin-bottom: 24px;">
+      <h2 class="section-title">📅 Buat Reservasi Baru</h2>
+      <p style="color: #6b7280; margin: 8px 0 0 0;">Pesan ruangan untuk kebutuhan Anda</p>
     </div>
 
     <!-- Error Message -->
     <?php if ($err): ?>
-      <div class="alert alert-error">
-        <span class="alert-icon">!</span>
-        <?= e($err) ?>
+      <div style="padding: 12px 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 16px;">
+        ✗ <?= e($err) ?>
       </div>
     <?php endif; ?>
 
     <!-- Reservation Form -->
-    <form method="POST" action="<?= base_path('/user/reservasi_create.php') ?>" class="reservation-form">
+    <form method="POST" action="<?= base_path('/user/reservasi_create.php') ?>" class="reservation-form" style="display: flex; flex-direction: column; gap: 24px;">
       <?= csrf_field() ?>
       
       <!-- Ruangan Card -->
-      <div class="form-card">
-        <h2 class="card-title">🚪 Pilih Ruangan</h2>
-        <div class="form-group">
-          <label for="ruangan_id" class="form-label">Ruangan <span class="required">*</span></label>
-          <div class="select-wrapper">
-            <span class="select-icon">🏢</span>
-            <select id="ruangan_id" name="ruangan_id" class="form-select" required>
-              <option value="">-- Pilih Ruangan --</option>
-              <?php foreach ($ruangan_list as $room): ?>
-                <option value="<?= (int)$room['id'] ?>">
-                  <?= e($room['nama']) ?> (Kapasitas: <?= (int)$room['kapasitas'] ?> orang)
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <p class="form-hint">Pilih ruangan yang ingin Anda reservasi</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">🚪 Pilih Ruangan</h3>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Ruangan <span style="color: #dc2626;">*</span></label>
+          <select id="ruangan_id" name="ruangan_id" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <option value="">-- Pilih Ruangan --</option>
+            <?php foreach ($ruangan_list as $room): ?>
+              <option value="<?= (int)$room['id'] ?>" data-capacity="<?= (int)$room['kapasitas'] ?>" data-location="<?= e($room['lokasi'] ?? '') ?>">
+                <?= e($room['nama']) ?> (Kapasitas: <?= (int)$room['kapasitas'] ?> orang)
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Pilih ruangan yang ingin Anda reservasi</p>
         </div>
 
         <!-- Room Details Info -->
-        <div id="room-details" class="room-details-info" style="display: none;">
-          <div class="detail-box">
-            <span class="detail-label">Kapasitas</span>
-            <span class="detail-value" id="capacity">-</span>
-          </div>
-          <div class="detail-box">
-            <span class="detail-label">Lokasi</span>
-            <span class="detail-value" id="location">-</span>
+        <div id="room-details" style="display: none; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+            <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+              <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Kapasitas</span>
+              <span style="display: block; color: #1f2937; font-weight: 600;" id="capacity">-</span>
+            </div>
+            <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+              <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Lokasi</span>
+              <span style="display: block; color: #1f2937; font-weight: 600;" id="location">-</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Date & Time Card -->
-      <div class="form-card">
-        <h2 class="card-title">📅 Tanggal & Waktu</h2>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">📅 Tanggal & Waktu</h3>
         
         <!-- Tanggal & Jumlah Peserta -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="tanggal" class="form-label">Tanggal Reservasi <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <input type="date" id="tanggal" name="tanggal" class="form-input" min="<?= $min_date ?>" required>
-            </div>
-            <p class="form-hint">Minimal 1 hari sebelumnya</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Tanggal Reservasi <span style="color: #dc2626;">*</span></label>
+            <input type="date" id="tanggal" name="tanggal" min="<?= $min_date ?>" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Minimal 1 hari sebelumnya</p>
           </div>
 
-          <div class="form-group">
-            <label for="jumlah_peserta" class="form-label">Jumlah Peserta <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <input type="number" id="jumlah_peserta" name="jumlah_peserta" class="form-input" min="1" value="1" required>
-            </div>
-            <p class="form-hint">Jumlah peserta yang akan hadir</p>
+          <div>
+            <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Jumlah Peserta <span style="color: #dc2626;">*</span></label>
+            <input type="number" id="jumlah_peserta" name="jumlah_peserta" min="1" value="1" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Jumlah peserta yang akan hadir</p>
           </div>
         </div>
 
         <!-- Waktu Mulai & Selesai -->
-        <div class="time-section">
-          <h3 class="time-section-title">Waktu Reservasi</h3>
+        <div style="padding-top: 16px; border-top: 1px solid #e5e7eb;">
+          <h4 style="font-size: 14px; font-weight: 600; color: #1f2937; margin: 0 0 12px 0;">⏰ Waktu Reservasi</h4>
           
-          <div class="form-row time-row">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
             <!-- Waktu Mulai -->
-            <div class="form-group time-group">
-              <label class="form-label">Waktu Mulai <span class="required">*</span></label>
-              <div class="time-input-wrapper">
-                <div class="time-input-box">
-                  <div class="time-input-inner">
-                    <label class="time-label">Jam</label>
-                    <select id="mulai_hour" name="mulai_hour" class="time-select" required>
-                      <option value="">--</option>
-                      <?php for ($h = 7; $h <= 18; $h++): ?>
-                        <option value="<?= str_pad($h, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($h, 2, '0', STR_PAD_LEFT) ?></option>
-                      <?php endfor; ?>
-                    </select>
-                  </div>
-                </div>
-                <span class="time-separator">:</span>
-                <div class="time-input-box">
-                  <div class="time-input-inner">
-                    <label class="time-label">Menit</label>
-                    <select id="mulai_minute" name="mulai_minute" class="time-select" required>
-                      <option value="">--</option>
-                      <?php for ($m = 0; $m < 60; $m += 15): ?>
-                        <option value="<?= str_pad($m, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($m, 2, '0', STR_PAD_LEFT) ?></option>
-                      <?php endfor; ?>
-                    </select>
-                  </div>
-                </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Waktu Mulai <span style="color: #dc2626;">*</span></label>
+              <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center;">
+                <select id="mulai_hour" name="mulai_hour" required style="padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">--</option>
+                  <?php for ($h = 7; $h <= 18; $h++): ?>
+                    <option value="<?= str_pad($h, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($h, 2, '0', STR_PAD_LEFT) ?></option>
+                  <?php endfor; ?>
+                </select>
+                <span style="font-weight: 600; color: #6b7280;">:</span>
+                <select id="mulai_minute" name="mulai_minute" required style="padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">--</option>
+                  <?php for ($m = 0; $m < 60; $m += 15): ?>
+                    <option value="<?= str_pad($m, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($m, 2, '0', STR_PAD_LEFT) ?></option>
+                  <?php endfor; ?>
+                </select>
               </div>
               <input type="hidden" id="mulai" name="mulai" required>
-              <p class="form-hint">07:00 - 18:00</p>
+              <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">07:00 - 18:00</p>
             </div>
 
             <!-- Waktu Selesai -->
-            <div class="form-group time-group">
-              <label class="form-label">Waktu Selesai <span class="required">*</span></label>
-              <div class="time-input-wrapper">
-                <div class="time-input-box">
-                  <div class="time-input-inner">
-                    <label class="time-label">Jam</label>
-                    <select id="selesai_hour" name="selesai_hour" class="time-select" required>
-                      <option value="">--</option>
-                      <?php for ($h = 7; $h <= 19; $h++): ?>
-                        <option value="<?= str_pad($h, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($h, 2, '0', STR_PAD_LEFT) ?></option>
-                      <?php endfor; ?>
-                      </select>
-                  </div>
-                </div>
-                <span class="time-separator">:</span>
-                <div class="time-input-box">
-                  <div class="time-input-inner">
-                    <label class="time-label">Menit</label>
-                    <select id="selesai_minute" name="selesai_minute" class="time-select" required>
-                      <option value="">--</option>
-                      <?php for ($m = 0; $m < 60; $m += 15): ?>
-                        <option value="<?= str_pad($m, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($m, 2, '0', STR_PAD_LEFT) ?></option>
-                      <?php endfor; ?>
-                    </select>
-                  </div>
-                </div>
+            <div>
+              <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Waktu Selesai <span style="color: #dc2626;">*</span></label>
+              <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center;">
+                <select id="selesai_hour" name="selesai_hour" required style="padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">--</option>
+                  <?php for ($h = 8; $h <= 19; $h++): ?>
+                    <option value="<?= str_pad($h, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($h, 2, '0', STR_PAD_LEFT) ?></option>
+                  <?php endfor; ?>
+                </select>
+                <span style="font-weight: 600; color: #6b7280;">:</span>
+                <select id="selesai_minute" name="selesai_minute" required style="padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                  <option value="">--</option>
+                  <?php for ($m = 0; $m < 60; $m += 15): ?>
+                    <option value="<?= str_pad($m, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($m, 2, '0', STR_PAD_LEFT) ?></option>
+                  <?php endfor; ?>
+                </select>
               </div>
               <input type="hidden" id="selesai" name="selesai" required>
-              <p class="form-hint">Harus setelah waktu mulai</p>
+              <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Harus lebih besar dari waktu mulai</p>
             </div>
           </div>
         </div>
-
-        <!-- Availability Display -->
-        <div id="availability-section" class="availability-section" style="display: none; margin-top: 30px;">
-          <h3 class="availability-title">📅 Ketersediaan Slot Jam</h3>
-          
-          <!-- Status Info -->
-          <div id="availability-status" class="availability-status"></div>
-          
-          <!-- Hour Blocks -->
-          <div id="availability-blocks" class="availability-blocks"></div>
-          
-          <!-- Booked Times Info -->
-          <div id="booked-times-info" class="booked-times-info"></div>
-        </div>        <!-- Duration Display -->
-        <div class="duration-info" style="margin-top: 20px;">
-          <span class="duration-icon">⏱️</span>
-          <div class="duration-content">
-            <strong>Durasi Reservasi: <span id="duration-display">-</span></strong>
-            <p id="duration-warning" class="duration-warning" style="display: none;"></p>
-          </div>
-        </div>
       </div>
 
-      <!-- Additional Info Card -->
-      <div class="form-card">
-        <h2 class="card-title">📝 Informasi Tambahan</h2>
+      <!-- Catatan Card -->
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">📝 Catatan Tambahan</h3>
         
-        <div class="form-group">
-          <label for="catatan" class="form-label">Catatan / Keterangan</label>
-          <div class="textarea-wrapper">
-            <span class="textarea-icon">💬</span>
-            <textarea id="catatan" name="catatan" class="form-textarea" placeholder="Masukkan catatan atau keterangan (opsional)"></textarea>
-          </div>
-          <p class="form-hint">Jelaskan keperluan atau kebutuhan khusus</p>
-        </div>
+        <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Keterangan</label>
+        <textarea name="keterangan" placeholder="Tuliskan keperluan atau catatan khusus tentang reservasi Anda..." style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
+        <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Opsional - Berikan informasi tambahan jika diperlukan</p>
       </div>
 
       <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-large">
-          <span>✓</span> Kirim Reservasi
+      <div style="display: flex; gap: 12px; margin-top: 8px;">
+        <button type="submit" style="padding: 12px 24px; background: #0066cc; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+          ✓ Pesan Ruangan
         </button>
-        <a href="<?= base_path('/user/dashboard.php') ?>" class="btn btn-secondary btn-large">
-          <span>✕</span> Batal
+        <a href="<?= base_path('/user/dashboard.php') ?>" style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block;">
+          ❌ Batal
         </a>
       </div>
-
-      <!-- Info Box -->
-      <div class="info-box-bottom">
-        <span class="info-icon">ℹ️</span>
-        <div class="info-content">
-          <strong>Status Reservasi</strong>
-          <p>Reservasi Anda akan berstatus <strong>Pending</strong> dan menunggu persetujuan dari admin. Anda akan menerima notifikasi ketika reservasi disetujui atau ditolak.</p>
-        </div>
-      </div>
     </form>
-
-  </div>
-</section>
-
-<style>
-.reservasi-add-section {
-  background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
-  min-height: 100vh;
-  padding: 24px 0 40px 0;
-}
-
-.add-wrapper {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 0 18px;
-}
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #0070f3;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 24px;
-  transition: color 0.2s;
-}
-
-.back-link:hover {
-  color: #0051cc;
-  text-decoration: underline;
-}
-
-.add-header {
-  margin-bottom: 32px;
-}
-
-.add-header h1 {
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.add-header p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-/* Alert */
-.alert {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid;
-}
-
-.alert-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.alert-error {
-  background: #fee2e2;
-  border-color: #ef4444;
-  color: #991b1b;
-}
-
-/* Form */
-.reservation-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 28px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s;
-}
-
-.form-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-color: #0070f3;
-}
-
-.card-title {
-  margin: 0 0 20px 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.form-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.required {
-  color: #ef4444;
-}
-
-.form-hint {
-  margin: 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-/* Select */
-.select-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-  transition: all 0.2s;
-}
-
-.select-wrapper:focus-within {
-  border-color: #0070f3;
-  background: #f0f4ff;
-  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
-}
-
-.select-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.form-select {
-  flex: 1;
-  padding: 12px 0;
-  border: none;
-  background: transparent;
-  color: #0f172a;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-}
-
-.form-select option {
-  background: #fff;
-  color: #0f172a;
-}
-
-/* Input */
-.input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-  transition: all 0.2s;
-}
-
-.input-wrapper:focus-within {
-  border-color: #0070f3;
-  background: #f0f4ff;
-  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
-}
-
-.input-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.form-input {
-  flex: 1;
-  padding: 12px 0;
-  border: none;
-  background: transparent;
-  color: #0f172a;
-  font-size: 14px;
-  outline: none;
-}
-
-.form-input::placeholder {
-  color: #cbd5e1;
-}
-
-/* Textarea */
-.textarea-wrapper {
-  display: flex;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-  transition: all 0.2s;
-  align-items: flex-start;
-}
-
-.textarea-wrapper:focus-within {
-  border-color: #0070f3;
-  background: #f0f4ff;
-  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
-}
-
-.textarea-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.form-textarea {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: #0f172a;
-  font-size: 14px;
-  outline: none;
-  resize: vertical;
-  min-height: 100px;
-  font-family: inherit;
-}
-
-.form-textarea::placeholder {
-  color: #cbd5e1;
-}
-
-/* Time Picker */
-.time-section {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 2px solid #e5e7eb;
-}
-
-.time-section-title {
-  margin: 0 0 16px 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #0070f3;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.time-row {
-  gap: 24px !important;
-}
-
-.time-group {
-  flex: 1;
-}
-
-.time-picker-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.time-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f9fafb 0%, #f0f2f5 100%);
-  transition: all 0.2s;
-}
-
-.time-input-wrapper:focus-within {
-  border-color: #0070f3;
-  background: #f0f4ff;
-  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
-}
-
-.time-input-box {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 0 8px;
-}
-
-.time-input-inner {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.time-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.time-select {
-  width: 100%;
-  padding: 10px 6px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #fff;
-  color: #0f172a;
-  font-size: 20px;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.time-select:hover {
-  border-color: #0070f3;
-  background: #f0f4ff;
-}
-
-.time-select:focus {
-  border-color: #0070f3;
-  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1);
-}
-
-.time-separator {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0070f3;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 0 4px;
-  margin: 0 2px;
-}
-
-/* Duration Info */
-.duration-info {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 16px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
-  border: 2px solid #fcd34d;
-  border-radius: 10px;
-  margin-top: 12px;
-}
-
-.duration-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-}
-
-.duration-content {
-  flex: 1;
-}
-
-.duration-content strong {
-  color: #92400e;
-  display: block;
-  margin-bottom: 4px;
-  font-size: 15px;
-}
-
-#duration-display {
-  color: #0070f3;
-  font-weight: 800;
-  font-size: 18px;
-}
-
-.duration-warning {
-  margin: 6px 0 0 0;
-  font-size: 12px;
-  color: #dc2626;
-  font-weight: 600;
-}
-
-/* Room Details */
-.room-details-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 16px 0;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 16px;
-}
-
-.detail-box {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
-  border-radius: 8px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.detail-value {
-  font-size: 14px;
-  color: #0f172a;
-  font-weight: 700;
-}
-
-/* Form Actions */
-.form-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding: 28px 0 0 0;
-  margin-top: 24px;
-  border-top: 2px solid #e5e7eb;
-}
-
-/* Info Box */
-.info-box-bottom {
-  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
-  border: 1px solid #93c5fd;
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.info-icon {
-  font-size: 24px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.info-content {
-  flex: 1;
-}
-
-.info-content strong {
-  color: #1e40af;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.info-content p {
-  margin: 0;
-  font-size: 13px;
-  color: #1e3a8a;
-  line-height: 1.5;
-}
-
-/* Availability Section */
-.availability-section {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 1px solid #7dd3fc;
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 30px;
-}
-
-.availability-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0c4a6e;
-  margin: 0 0 15px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.availability-status {
-  margin-bottom: 20px;
-}
-
-.status-card {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.status-badge {
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-badge.available {
-  background: #86efac;
-  color: #166534;
-}
-
-.status-badge.blocked {
-  background: #fca5a5;
-  color: #7f1d1d;
-}
-
-.status-badge.percent {
-  background: #fbbf24;
-  color: #92400e;
-}
-
-.availability-blocks {
-  margin: 20px 0;
-}
-
-.hour-blocks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-  gap: 8px;
-  margin-bottom: 15px;
-}
-
-.hour-block {
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: default;
-  border: 2px solid transparent;
-  transition: all 0.3s;
-  position: relative;
-}
-
-.hour-block.available {
-  background: #dcfce7;
-  color: #166534;
-  border-color: #86efac;
-}
-
-.hour-block.available:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 12px rgba(134, 239, 172, 0.4);
-}
-
-.hour-block.blocked {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #fca5a5;
-  opacity: 0.8;
-}
-
-.hour-label {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.block-icon {
-  font-size: 16px;
-  margin-top: 2px;
-}
-
-.booked-times-info {
-  background: white;
-  border-radius: 8px;
-  padding: 12px;
-  border-left: 4px solid #f97316;
-}
-
-.booked-times-list {
-  margin: 0;
-}
-
-.list-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #0c4a6e;
-  margin: 0 0 8px 0;
-}
-
-.booked-times-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.booked-times-list li {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid #fca5a5;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .add-wrapper {
-    padding: 0 12px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .time-row {
-    gap: 12px !important;
-  }
-
-  .form-actions {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .add-header h1 {
-    font-size: 22px;
-  }
-
-  .form-card {
-    padding: 20px;
-  }
-
-  .room-details-info {
-    grid-template-columns: 1fr;
-  }
-
-  .time-input-wrapper {
-    padding: 10px;
-    gap: 4px;
-  }
-
-  .time-select {
-    font-size: 18px;
-    padding: 8px 4px;
-  }
-
-  .time-separator {
-    font-size: 24px;
-    padding: 0 2px;
-  }
-}
-
-@media (max-width: 480px) {
-  .reservasi-add-section {
-    padding: 12px 0 32px 0;
-  }
-
-  .add-wrapper {
-    padding: 0 12px;
-  }
-
-  .add-header h1 {
-    font-size: 20px;
-  }
-
-  .form-card {
-    padding: 16px;
-  }
-
-  .btn {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .time-input-wrapper {
-    padding: 8px;
-  }
-
-  .time-select {
-    font-size: 16px;
-    padding: 8px 2px;
-  }
-
-  .time-separator {
-    font-size: 20px;
-    padding: 0;
-    margin: 0 -2px;
-  }
-
-  .time-section {
-    margin-top: 16px;
-    padding-top: 16px;
-  }
-
-  .time-row {
-    gap: 12px !important;
-  }
-
-  .duration-info {
-    padding: 12px;
-  }
-
-  .duration-icon {
-    font-size: 24px;
-  }
-
-  .duration-content strong {
-    font-size: 14px;
-  }
-
-  #duration-display {
-    font-size: 16px;
-  }
-}
-</style>
+</div>
 
 <script>
 // Update room details when selection changes
@@ -1204,5 +412,11 @@ form.addEventListener('submit', async function(e) {
 });
 </script>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php
+// Capture the HTML content
+$page_content = ob_get_clean();
+
+// Load the user layout template with admin style
+require __DIR__ . '/../templates/layout-user-admin.php';
+?>
 

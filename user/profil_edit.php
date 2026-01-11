@@ -154,200 +154,156 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $title = "Edit Profil";
-require __DIR__ . '/../templates/header.php';
+
+// Start output buffering
+ob_start();
 
 $profile_pic_url = $user['profile_picture'] ? base_path('/' . $user['profile_picture']) : '';
 $initials = strtoupper(substr($user['fullname'] ?? 'U', 0, 1));
 ?>
 
-<section class="profile-edit-section">
-  <div class="profile-edit-wrapper">
-    
-    <!-- Back Button -->
-    <a href="<?= base_path('/user/profil_view.php') ?>" class="back-link">
-      <span>← Kembali ke Profil</span>
-    </a>
-
+<div class="profile-edit-wrapper">
     <!-- Page Title -->
-    <div class="edit-page-header">
-      <h1>Edit Profil</h1>
-      <p>Perbarui informasi akun dan foto profil Anda</p>
+    <div style="margin-bottom: 24px;">
+      <h2 class="section-title">✏️ Edit Profil</h2>
+      <p style="color: #6b7280; margin: 8px 0 0 0;">Perbarui informasi akun dan foto profil Anda</p>
     </div>
 
     <!-- Messages -->
     <?php if (!empty($message)): ?>
-      <div class="alert alert-success">
-        <span class="alert-icon">✓</span>
-        <?= $message ?>
+      <div style="padding: 12px 16px; background: #d1fae5; color: #065f46; border-radius: 8px; border: 1px solid #a7f3d0; margin-bottom: 16px;">
+        ✓ <?= $message ?>
       </div>
     <?php endif; ?>
 
     <?php if (!empty($error)): ?>
-      <div class="alert alert-error">
-        <span class="alert-icon">!</span>
-        <?= $error ?>
+      <div style="padding: 12px 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 16px;">
+        ✗ <?= $error ?>
       </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="edit-form">
+    <form method="POST" enctype="multipart/form-data">
       <?= csrf_field() ?>
       
       <!-- Profile Picture Card -->
-      <div class="edit-card">
-        <h2 class="card-title">Foto Profil</h2>
-          <p class="card-subtitle">Ubah atau hapus foto profil Anda</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">📷 Foto Profil</h3>
+        <p style="color: #6b7280; font-size: 13px; margin: 0 0 16px 0;">Ubah atau hapus foto profil Anda</p>
 
-        <div class="pic-section">
-          <div class="pic-preview">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start;">
+          <div style="width: 120px; height: 120px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
             <?php if (!empty($profile_pic_url)): ?>
-              <img src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" class="preview-img">
+              <img src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" style="width: 100%; height: 100%; object-fit: cover;" id="preview">
             <?php else: ?>
-              <div class="preview-empty">
-                <p>Belum ada foto</p>
+              <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: bold;" id="preview">
+                <?= $initials ?>
               </div>
             <?php endif; ?>
           </div>
 
-          <div class="pic-upload">
-            <input type="file" id="profile_picture" name="profile_picture" class="file-input" accept="image/*">
-            <label for="profile_picture" class="upload-label">
-              <div class="upload-content">
-                <p class="upload-title">Klik untuk upload</p>
-                <p class="upload-hint">atau drag & drop</p>
-              </div>
-            </label>
-            <p class="upload-info">JPG, PNG, GIF, WebP (Max 5MB)</p>
+          <div style="flex: 1;">
+            <input type="file" id="profile_picture" name="profile_picture" style="display: none;" accept="image/*">
+            <button type="button" style="padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 8px;" onclick="document.getElementById('profile_picture').click();">
+              📁 Pilih Foto
+            </button>
+            <p style="color: #6b7280; font-size: 12px; margin: 8px 0 0 0;">JPG, PNG, GIF, WebP (Max 5MB)</p>
           </div>
         </div>
       </div>
 
       <!-- Personal Information -->
-      <div class="edit-card">
-        <h2 class="card-title">Informasi Pribadi</h2>
-        <p class="card-subtitle">Perbarui data diri Anda</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">👤 Informasi Pribadi</h3>
 
-        <div class="form-group">
-          <label for="fullname" class="form-label">Nama Lengkap <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <input type="text" id="fullname" name="fullname" class="form-input" value="<?= e($user['fullname'] ?? '') ?>" required minlength="3">
-          </div>
-          <p class="form-hint">Gunakan nama lengkap yang sesungguhnya</p>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Nama Lengkap <span style="color: #dc2626;">*</span></label>
+          <input type="text" name="fullname" value="<?= e($user['fullname'] ?? '') ?>" required minlength="3" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Gunakan nama lengkap yang sesungguhnya</p>
         </div>
 
-        <div class="form-group">
-          <label for="email" class="form-label">Email <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <input type="email" id="email" name="email" class="form-input" value="<?= e($user['email'] ?? '') ?>" required>
-          </div>
-          <p class="form-hint">Email digunakan untuk login dan notifikasi penting</p>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Email <span style="color: #dc2626;">*</span></label>
+          <input type="email" name="email" value="<?= e($user['email'] ?? '') ?>" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Email digunakan untuk login dan notifikasi penting</p>
         </div>
 
-        <div class="info-boxes">
-          <div class="info-box">
-            <span class="box-label">🆔 User ID</span>
-            <span class="box-value">#<?= (int)$user['id'] ?></span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+          <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+            <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">🆔 User ID</span>
+            <span style="display: block; color: #1f2937; font-weight: 600;">#<?= (int)$user['id'] ?></span>
           </div>
-          <div class="info-box">
-            <span class="box-label">👨‍💼 Role</span>
-            <span class="box-value">User Regular</span>
+          <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+            <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">👨‍💼 Role</span>
+            <span style="display: block; color: #1f2937; font-weight: 600;">User Regular</span>
           </div>
-          <div class="info-box">
-            <span class="box-label">📅 Terdaftar</span>
-            <span class="box-value"><?= date('d M Y', strtotime($user['created_at'] ?? now())) ?></span>
+          <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+            <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">📅 Terdaftar</span>
+            <span style="display: block; color: #1f2937; font-weight: 600;"><?= date('d M Y', strtotime($user['created_at'] ?? now())) ?></span>
           </div>
         </div>
       </div>
 
       <!-- Password Change -->
-      <div class="edit-card">
-        <h2 class="card-title">Ubah Password</h2>
-        <p class="card-subtitle">Biarkan kosong jika tidak ingin mengubah</p>
-        <div class="form-group">
-          <label for="current_password" class="form-label">Password Saat Ini</label>
-          <div class="input-wrapper">
-            <input type="password" id="current_password" name="current_password" class="form-input" placeholder="Masukkan password saat ini jika ingin mengganti">
-          </div>
-          <p class="form-hint">Diperlukan saat ingin mengganti password</p>
+      <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">🔐 Ubah Password</h3>
+        <p style="color: #6b7280; font-size: 13px; margin: 0 0 16px 0;">Biarkan kosong jika tidak ingin mengubah</p>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Password Saat Ini</label>
+          <input type="password" name="current_password" placeholder="Masukkan password saat ini jika ingin mengganti" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Diperlukan saat ingin mengganti password</p>
         </div>
 
-        <div class="form-group">
-          <label for="password" class="form-label">Password Baru</label>
-          <div class="input-wrapper">
-            <input type="password" id="password" name="password" class="form-input" minlength="6" placeholder="Minimal 6 karakter">
-          </div>
-          <p class="form-hint">Gunakan kombinasi huruf besar, kecil, dan angka</p>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Password Baru</label>
+          <input type="password" name="password" id="password" minlength="6" placeholder="Minimal 6 karakter" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Gunakan kombinasi huruf besar, kecil, dan angka</p>
         </div>
 
-        <div class="form-group">
-          <label for="password_confirm" class="form-label">Konfirmasi Password</label>
-          <div class="input-wrapper">
-            <input type="password" id="password_confirm" name="password_confirm" class="form-input" minlength="6" placeholder="Ulangi password baru">
-          </div>
-          <p class="form-hint">Pastikan kedua password sama</p>
+        <div style="margin-bottom: 0;">
+          <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 6px;">Konfirmasi Password</label>
+          <input type="password" name="password_confirm" id="password_confirm" minlength="6" placeholder="Ulangi password baru" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+          <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">Pastikan kedua password sama</p>
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-large">
-          <span>💾</span> Simpan Perubahan
+      <div style="display: flex; gap: 12px;">
+        <button type="submit" style="padding: 12px 24px; background: #0066cc; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+          💾 Simpan Perubahan
         </button>
-        <a href="<?= base_path('/user/profil_view.php') ?>" class="btn btn-secondary btn-large">
-          <span>❌</span> Batal
+        <a href="<?= base_path('/user/profil_view.php') ?>" style="padding: 12px 24px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block;">
+          ❌ Batal
         </a>
       </div>
     </form>
-
-  </div>
-</section>
+</div>
 
 <script>
-// File upload preview and drag-drop
+// File upload preview
 const fileInput = document.getElementById('profile_picture');
-const uploadLabel = document.querySelector('.upload-label');
-const previewDiv = document.querySelector('.pic-preview');
+const preview = document.getElementById('preview');
 
-// Drag and drop
-uploadLabel.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  uploadLabel.classList.add('dragging');
-});
-
-uploadLabel.addEventListener('dragleave', () => {
-  uploadLabel.classList.remove('dragging');
-});
-
-uploadLabel.addEventListener('drop', (e) => {
-  e.preventDefault();
-  uploadLabel.classList.remove('dragging');
-  fileInput.files = e.dataTransfer.files;
-  previewFile(e.dataTransfer.files[0]);
-});
-
-// File input change
 fileInput.addEventListener('change', (e) => {
   if (e.target.files.length > 0) {
-    previewFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        preview.innerHTML = '<img src="' + event.target.result + '" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">';
+      };
+      reader.readAsDataURL(file);
+    }
   }
 });
 
-function previewFile(file) {
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-img">`;
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
 // Form validation
-const form = document.querySelector('.edit-form');
+const form = document.querySelector('form');
 const passwordInput = document.getElementById('password');
 const confirmInput = document.getElementById('password_confirm');
 
 form.addEventListener('submit', (e) => {
-  if (passwordInput.value !== confirmInput.value) {
+  if (passwordInput.value && passwordInput.value !== confirmInput.value) {
     e.preventDefault();
     alert('Password dan konfirmasi password tidak sesuai!');
     confirmInput.focus();
@@ -355,4 +311,9 @@ form.addEventListener('submit', (e) => {
 });
 </script>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php
+// Capture the HTML content
+$page_content = ob_get_clean();
+
+// Load the user layout template with admin style
+require __DIR__ . '/../templates/layout-user-admin.php';

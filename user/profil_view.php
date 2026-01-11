@@ -21,7 +21,9 @@ if (mysqli_num_rows($check_column) > 0) {
 }
 
 $title = "Profil Saya";
-require __DIR__ . '/../templates/header.php';
+
+// Start output buffering
+ob_start();
 
 $profile_pic_url = $user['profile_picture'] ? base_path('/' . $user['profile_picture']) : '';
 $initials = strtoupper(substr($user['fullname'] ?? 'U', 0, 1));
@@ -30,73 +32,76 @@ $flash_success = flash_get('success');
 $flash_error = flash_get('error');
 ?>
 
-<section class="profile-section">
-  <div class="profile-wrapper">
+<div class="profile-wrapper">
     <?php if ($flash_success): ?>
-      <div class="alert alert-success"><?= e($flash_success) ?></div>
+      <div style="padding: 12px 16px; background: #d1fae5; color: #065f46; border-radius: 8px; border: 1px solid #a7f3d0; margin-bottom: 16px;">
+        ✓ <?= e($flash_success) ?>
+      </div>
     <?php endif; ?>
     <?php if ($flash_error): ?>
-      <div class="alert alert-error"><?= e($flash_error) ?></div>
+      <div style="padding: 12px 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 16px;">
+        ✗ <?= e($flash_error) ?>
+      </div>
     <?php endif; ?>
     
     <!-- Profile Header -->
-    <div class="profile-view-header">
-      <div class="profile-view-avatar">
+    <div style="display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <div style="flex-shrink: 0;">
         <?php if (!empty($profile_pic_url)): ?>
-          <img src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" class="avatar-image">
+          <img src="<?= $profile_pic_url ?>" alt="<?= e($user['fullname']) ?>" style="width: 120px; height: 120px; border-radius: 12px; object-fit: cover;">
         <?php else: ?>
-          <div class="avatar-initial"><?= $initials ?></div>
+          <div style="width: 120px; height: 120px; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: bold;">
+            <?= $initials ?>
+          </div>
         <?php endif; ?>
       </div>
 
-      <div class="profile-view-info">
-        <h1 class="profile-view-name"><?= e($user['fullname'] ?? 'Pengguna') ?></h1>
-        <p class="profile-view-role">Pengguna Regular</p>
-        <p class="profile-view-date">
+      <div style="flex: 1;">
+        <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: #1f2937;">
+          👤 <?= e($user['fullname'] ?? 'Pengguna') ?>
+        </h1>
+        <p style="color: #6b7280; font-size: 14px; margin: 0 0 12px 0;">Pengguna Regular</p>
+        <p style="color: #6b7280; font-size: 13px; margin: 0;">
           Terdaftar sejak <strong><?= date('d M Y', strtotime($user['created_at'] ?? now())) ?></strong>
         </p>
       </div>
 
-      <div class="profile-view-actions">
-        <a href="<?= base_path('/user/profil_edit.php') ?>" class="btn btn-primary">Edit Profil</a>
+      <div>
+        <a href="<?= base_path('/user/profil_edit.php') ?>" class="btn btn-primary" style="padding: 10px 20px; background: #0066cc; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">✏️ Edit Profil</a>
       </div>
     </div>
 
     <!-- Account Info -->
-    <div class="profile-card">
-      <h2 class="card-title">Informasi Akun</h2>
-      <div class="info-grid">
-        <div class="info-row">
-          <span class="info-label">Email</span>
-          <span class="info-value"><?= e($user['email'] ?? '-') ?></span>
+    <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">📋 Informasi Akun</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+          <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Email</span>
+          <span style="display: block; color: #1f2937; font-weight: 600;"><?= e($user['email'] ?? '-') ?></span>
         </div>
-        <div class="info-row">
-          <span class="info-label">ID Pengguna</span>
-          <span class="info-value">#<?= (int)$user['id'] ?></span>
+        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+          <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">ID Pengguna</span>
+          <span style="display: block; color: #1f2937; font-weight: 600;">#<?= (int)$user['id'] ?></span>
         </div>
-        <div class="info-row">
-          <span class="info-label">Role</span>
-          <span class="info-value">
-            <span class="role-badge">User Regular</span>
-          </span>
+        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+          <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Role</span>
+          <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">User Regular</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">Status</span>
-          <span class="info-value">
-            <span class="status-badge-active">✓ Aktif</span>
-          </span>
+        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+          <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Status</span>
+          <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">✓ Aktif</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">Terdaftar Pada</span>
-          <span class="info-value"><?= date('d M Y H:i', strtotime($user['created_at'] ?? now())) ?></span>
+        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+          <span style="display: block; color: #9ca3af; font-size: 12px; font-weight: 500; margin-bottom: 4px;">Terdaftar Pada</span>
+          <span style="display: block; color: #1f2937; font-weight: 600;"><?= date('d M Y H:i', strtotime($user['created_at'] ?? now())) ?></span>
         </div>
       </div>
     </div>
 
     <!-- Reservations Stats -->
-    <div class="profile-stats">
-      <h2 class="card-title">Statistik Reservasi</h2>
-      <div class="stats-grid">
+    <div style="padding: 24px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0; color: #1f2937;">📊 Statistik Reservasi</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
         <?php
         $total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM reservasi WHERE user_id=$userId"))['count'] ?? 0;
         $approved = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM reservasi WHERE user_id=$userId AND status='approved'"))['count'] ?? 0;
@@ -104,43 +109,32 @@ $flash_error = flash_get('error');
         $rejected = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM reservasi WHERE user_id=$userId AND status='rejected'"))['count'] ?? 0;
         ?>
         
-        <div class="stat-card">
-          <div class="stat-icon">📌</div>
-          <div class="stat-content">
-            <div class="stat-number"><?= $total ?></div>
-            <div class="stat-label">Total Reservasi</div>
-          </div>
+        <div style="padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;"><?= $total ?></div>
+          <div style="font-size: 12px; opacity: 0.9;">Total Reservasi</div>
         </div>
 
-        <div class="stat-card approved">
-          <div class="stat-icon">✓</div>
-          <div class="stat-content">
-            <div class="stat-number"><?= $approved ?></div>
-            <div class="stat-label">Disetujui</div>
-          </div>
+        <div style="padding: 16px; background: #d1fae5; border-radius: 8px;">
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px; color: #065f46;"><?= $approved ?></div>
+          <div style="font-size: 12px; color: #065f46;">Disetujui</div>
         </div>
 
-        <div class="stat-card pending">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-content">
-            <div class="stat-number"><?= $pending ?></div>
-            <div class="stat-label">Menunggu</div>
-          </div>
+        <div style="padding: 16px; background: #fef3c7; border-radius: 8px;">
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px; color: #92400e;"><?= $pending ?></div>
+          <div style="font-size: 12px; color: #92400e;">Menunggu</div>
         </div>
 
-        <div class="stat-card rejected">
-          <div class="stat-icon">✗</div>
-          <div class="stat-content">
-            <div class="stat-number"><?= $rejected ?></div>
-            <div class="stat-label">Ditolak</div>
-          </div>
+        <div style="padding: 16px; background: #fee2e2; border-radius: 8px;">
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px; color: #991b1b;"><?= $rejected ?></div>
+          <div style="font-size: 12px; color: #991b1b;">Ditolak</div>
         </div>
       </div>
     </div>
+</div>
 
-    <!-- Quick Actions removed to simplify UI -->
+<?php
+// Capture the HTML content
+$page_content = ob_get_clean();
 
-  </div>
-</section>
-
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+// Load the user layout template with admin style
+require __DIR__ . '/../templates/layout-user-admin.php';

@@ -59,24 +59,21 @@ if ($adminId > 0) {
   @mysqli_query($conn, "UPDATE notifikasi SET is_read=1 WHERE user_id=$adminId AND is_read=0");
 }
 
-require __DIR__ . '/../templates/header.php';
+ob_start();
+?>
 ?>
 
 <section class="admin-dashboard">
   <div class="dashboard-wrapper">
     <div class="dashboard-grid">
-      <?php 
-        $sidebar_type = 'admin';
-        require __DIR__ . '/../templates/sidebar.php'; 
-      ?>
       <div class="dashboard-main">
-    <!-- Hero Section -->
-    <div class="admin-hero">
-      <div class="hero-content">
-        <h1>Dashboard Admin</h1>
-        <p>Selamat datang kembali. Kelola sistem reservasi ruangan dengan efisien dan profesional.</p>
-      </div>
+    
+    <!-- Welcome Section -->
+    <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+      <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700;">Selamat Datang di Admin Panel 👋</h2>
+      <p style="margin: 0; font-size: 14px; color: rgba(255, 255, 255, 0.9);">Pantau dan kelola semua aspek sistem reservasi ruangan dengan mudah</p>
     </div>
+    
     <!-- Admin Notification Section -->
     <div class="admin-notifications" style="margin-top:12px;margin-bottom:18px">
       <?php
@@ -165,27 +162,6 @@ require __DIR__ . '/../templates/header.php';
       </div>
     </div>
 
-    <!-- Top Rooms & Action Buttons -->
-    <div class="bottom-section">
-      <!-- Top Booked Rooms -->
-      <div class="top-rooms-card">
-        <h3 class="section-heading">🏆 Ruangan Paling Sering Dipesan</h3>
-        <div class="rooms-list">
-          <?php if (count($room_status) > 0): ?>
-            <?php foreach ($room_status as $room): ?>
-              <div class="room-item">
-                <div class="room-name"><?= e($room['nama']) ?></div>
-                <div class="room-booking-count"><?= (int)$room['bookings'] ?> pemesanan</div>
-              </div>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <p style="color: #999; text-align: center; padding: 20px;">Belum ada data ruangan</p>
-          <?php endif; ?>
-        </div>
-      </div>
-
-    </div>
-
     <!-- Recent Pending Reservations -->
     <div class="recent-pending">
       <h3 class="section-heading">🕒 Reservasi Menunggu (Cepat Tanggapi)</h3>
@@ -227,8 +203,6 @@ require __DIR__ . '/../templates/header.php';
           <div class="status-number"><?= (int)$rejected_reservations ?></div>
           <div class="status-name">Ditolak</div>
         </div>
-      </div>
-      </div>
     </div>
   </div>
 </section>
@@ -309,4 +283,7 @@ new Chart(statusCtx, {
 });
 </script>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-admin.php';
+?>

@@ -42,35 +42,15 @@ if (mysqli_num_rows($check_pp) > 0) {
 @mysqli_query($conn, "UPDATE notifikasi SET is_read=1 WHERE user_id=$userId AND is_read=0");
 
 $title = "Dashboard User";
-require __DIR__ . '/../templates/header.php';
-?>
 
-<section class="user-dashboard">
-  <div class="dashboard-wrapper">
-    <div class="dashboard-grid">
-      <?php 
-        $sidebar_type = 'user';
-        require __DIR__ . '/../templates/sidebar.php'; 
-      ?>
-      <div class="dashboard-main">
+// Capture output untuk layout-user-admin
+ob_start();
+?>
     
-    <!-- Header Section with Avatar and Welcome -->
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-left">
-          <div class="header-avatar">
-            <?php if (!empty($profile_pic_url)): ?>
-              <img src="<?= $profile_pic_url ?>" alt="<?= e($user_info['fullname'] ?? 'User') ?>">
-            <?php else: ?>
-              <div class="avatar-initial"><?= strtoupper(substr($user_info['fullname'] ?? 'U', 0, 1)) ?></div>
-            <?php endif; ?>
-          </div>
-          <div class="header-info">
-            <h1 class="header-name">Halo, <?= e($_SESSION['name'] ?? 'User') ?> 👋</h1>
-            <p class="header-subtitle">Kelola dan pantau semua reservasi ruangan Anda</p>
-          </div>
-        </div>
-      </div>
+    <!-- Welcome Section -->
+    <div style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+      <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700;">Selamat Datang, <?= e($_SESSION['name'] ?? 'User') ?> 👋</h1>
+      <p style="margin: 0; font-size: 14px; color: rgba(255, 255, 255, 0.9);">Kelola dan pantau semua reservasi ruangan Anda dengan mudah</p>
     </div>
 
     <!-- Notification Section -->
@@ -152,133 +132,99 @@ require __DIR__ . '/../templates/header.php';
         </div>
         </div>
       </div>
-    </div>
+    </section>
   </section>
 
-    <!-- Quick Menu -->
-    <section class="quick-menu">
-      <h2 class="section-title">⚡ Menu Cepat</h2>
-      <div class="quick-menu-grid">
-        <a href="<?= base_path('/user/reservasi_add.php') ?>" class="quick-menu-item create">
-          <div class="menu-icon">📅</div>
-          <div class="menu-text">
-            <strong>Buat Reservasi</strong>
-            <small>Pesan ruangan baru</small>
-          </div>
-        </a>
-        <a href="<?= base_path('/user/ruangan_list.php') ?>" class="quick-menu-item rooms">
-          <div class="menu-icon">🚪</div>
-          <div class="menu-text">
-            <strong>Lihat Ruangan</strong>
-            <small>Cek daftar semua ruangan</small>
-          </div>
-        </a>
-        <a href="<?= base_path('/user/cek_ketersediaan.php') ?>" class="quick-menu-item availability">
-          <div class="menu-icon">📊</div>
-          <div class="menu-text">
-            <strong>Cek Ketersediaan</strong>
-            <small>Lihat slot yang tersedia</small>
-          </div>
-        </a>
-        <a href="<?= base_path('/user/reservasi_history.php') ?>" class="quick-menu-item history">
-          <div class="menu-icon">📜</div>
-          <div class="menu-text">
-            <strong>Riwayat Reservasi</strong>
-            <small>Lihat semua reservasi Anda</small>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Active Reservations -->
-    <section class="active-reservations">
-      <h2 class="section-title">🔴 Reservasi Aktif (<?= count($active_reservations) ?>)</h2>
-      <?php if (count($active_reservations) > 0): ?>
-        <div class="active-res-list">
-          <?php foreach ($active_reservations as $res): ?>
-            <div class="active-res-card">
-              <div class="res-header">
-                <h3 class="res-room"><?= e($res['nama'] ?? 'Ruangan') ?></h3>
-                <span class="res-status">✅ Disetujui</span>
-              </div>
-              <div class="res-details">
-                <p><strong>📅 Tanggal:</strong> <?= date('d M Y', strtotime($res['tanggal'])) ?></p>
-                <p><strong>⏰ Waktu:</strong> <?= date('H:i', strtotime($res['waktu_mulai'])) ?> - <?= date('H:i', strtotime($res['waktu_selesai'])) ?></p>
-              </div>
-              <div class="res-actions">
-                <a href="<?= base_path('/user/reservasi_view.php?id=') ?><?= (int)$res['id'] ?>" class="btn small">Lihat</a>
-                <a href="<?= base_path('/user/reservasi_delete.php?id=') ?><?= (int)$res['id'] ?>" class="btn small danger" data-confirm="Batalkan reservasi ini?">Batalkan</a>
-              </div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      <?php else: ?>
-        <div class="no-active">
-          <p>📭 Tidak ada reservasi aktif. <a href="<?= base_path('/user/reservasi_add.php') ?>">Buat reservasi baru</a></p>
-        </div>
-      <?php endif; ?>
-    </section>
-
-    <!-- Recent Reservations -->
-    <section class="recent-reservations">
-      <div class="section-header">
-        <h2 class="section-title">⏰ Reservasi Terbaru</h2>
-        <div class="section-actions">
-          <div class="search-wrap">
-            <input type="search" id="reservasiSearch" placeholder="Cari ruangan atau tanggal (mis. Meeting)" class="search-input">
-            <button id="reservasiClear" class="search-clear" aria-label="Hapus pencarian">✕</button>
-          </div>
-          <a href="<?= base_path('/user/reservasi_history.php') ?>" class="view-all">Lihat Semua →</a>
-        </div>
-      </div>
-      
-      <?php if (count($latest) > 0): ?>
-        <div class="reservations-list" id="reservationsList">
-          <?php foreach ($latest as $res): ?>
-            <div class="reservation-item" data-room="<?= e($res['nama']) ?>" data-date="<?= e($res['tanggal']) ?>">
-              <div class="reservation-left">
-                <div class="reservation-room">
-                  <span class="room-icon">🚪</span>
-                  <div class="room-info">
-                    <h4 class="room-name"><?= e($res['nama'] ?? 'Ruangan') ?></h4>
-                    <p class="room-date">
-                      <?= date('d M Y', strtotime($res['tanggal'])) ?> 
-                      | <?= date('H:i', strtotime($res['waktu_mulai'])) ?> - <?= date('H:i', strtotime($res['waktu_selesai'])) ?>
-                    </p>
-                  </div>
+    <div class="reservations-container">
+      <!-- Active Reservations -->
+      <section class="active-reservations">
+        <h2 class="section-title">🔴 Reservasi Aktif (<?= count($active_reservations) ?>)</h2>
+        <?php if (count($active_reservations) > 0): ?>
+          <div class="active-res-list">
+            <?php foreach ($active_reservations as $res): ?>
+              <div class="active-res-card">
+                <div class="res-header">
+                  <h3 class="res-room"><?= e($res['nama'] ?? 'Ruangan') ?></h3>
+                  <span class="res-status">✅ Disetujui</span>
                 </div>
-              </div>
-              <div class="reservation-right">
-                <span class="status-badge status-badge-<?= $res['status'] ?>">
-                  <?php 
-                    if ($res['status'] === 'approved') echo '✅ Disetujui';
-                    elseif ($res['status'] === 'pending') echo '⏳ Menunggu';
-                    else echo '❌ Ditolak';
-                  ?>
-                </span>
-                <div class="reservation-actions">
+                <div class="res-details">
+                  <p><strong>📅 Tanggal:</strong> <?= date('d M Y', strtotime($res['tanggal'])) ?></p>
+                  <p><strong>⏰ Waktu:</strong> <?= date('H:i', strtotime($res['waktu_mulai'])) ?> - <?= date('H:i', strtotime($res['waktu_selesai'])) ?></p>
+                </div>
+                <div class="res-actions">
                   <a href="<?= base_path('/user/reservasi_view.php?id=') ?><?= (int)$res['id'] ?>" class="btn small">Lihat</a>
                   <a href="<?= base_path('/user/reservasi_delete.php?id=') ?><?= (int)$res['id'] ?>" class="btn small danger" data-confirm="Batalkan reservasi ini?">Batalkan</a>
                 </div>
               </div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-        <div id="reservationsNoResults" class="no-results" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:#fff3cd;color:#856404;border:1px solid #ffe8a1">🔎 Tidak ada hasil pencarian.</div>
-        <?php if ((int)$tot > 20): ?>
-          <div class="load-more-wrap" style="margin-top:12px;text-align:center">
-            <button id="loadMoreReservations" class="btn" data-url="<?= base_path('/user/reservasi_list_ajax.php') ?>" data-offset="20">Muat Lagi</button>
+            <?php endforeach; ?>
+          </div>
+        <?php else: ?>
+          <div class="no-active">
+            <p>📭 Tidak ada reservasi aktif. <a href="<?= base_path('/user/reservasi_add.php') ?>">Buat reservasi baru</a></p>
           </div>
         <?php endif; ?>
-      <?php else: ?>
-        <div class="no-data">
-          <p>📭 Belum ada reservasi. Mulai dengan membuat reservasi baru.</p>
-        </div>
-      <?php endif; ?>
-    </section>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
-<?php require __DIR__ . '/../templates/footer.php'; ?>
+      <!-- Recent Reservations -->
+      <section class="recent-reservations">
+        <div class="section-header">
+          <h2 class="section-title">⏰ Reservasi Terbaru</h2>
+          <div class="section-actions">
+            <div class="search-wrap">
+              <input type="search" id="reservasiSearch" placeholder="Cari ruangan atau tanggal (mis. Meeting)" class="search-input">
+              <button id="reservasiClear" class="search-clear" aria-label="Hapus pencarian">✕</button>
+            </div>
+            <a href="<?= base_path('/user/reservasi_history.php') ?>" class="view-all">Lihat Semua →</a>
+          </div>
+        </div>
+        
+        <?php if (count($latest) > 0): ?>
+          <div class="reservations-list" id="reservationsList">
+            <?php foreach ($latest as $res): ?>
+              <div class="reservation-item" data-room="<?= e($res['nama']) ?>" data-date="<?= e($res['tanggal']) ?>">
+                <div class="reservation-left">
+                  <div class="reservation-room">
+                    <span class="room-icon">🚪</span>
+                    <div class="room-info">
+                      <h4 class="room-name"><?= e($res['nama'] ?? 'Ruangan') ?></h4>
+                      <p class="room-date">
+                        <?= date('d M Y', strtotime($res['tanggal'])) ?> 
+                        | <?= date('H:i', strtotime($res['waktu_mulai'])) ?> - <?= date('H:i', strtotime($res['waktu_selesai'])) ?>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="reservation-right">
+                  <span class="status-badge status-badge-<?= $res['status'] ?>">
+                    <?php 
+                      if ($res['status'] === 'approved') echo '✅ Disetujui';
+                      elseif ($res['status'] === 'pending') echo '⏳ Menunggu';
+                      else echo '❌ Ditolak';
+                    ?>
+                  </span>
+                  <div class="reservation-actions">
+                    <a href="<?= base_path('/user/reservasi_view.php?id=') ?><?= (int)$res['id'] ?>" class="btn small">Lihat</a>
+                    <a href="<?= base_path('/user/reservasi_delete.php?id=') ?><?= (int)$res['id'] ?>" class="btn small danger" data-confirm="Batalkan reservasi ini?">Batalkan</a>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <div id="reservationsNoResults" class="no-results" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:#fff3cd;color:#856404;border:1px solid #ffe8a1">🔎 Tidak ada hasil pencarian.</div>
+          <?php if ((int)$tot > 20): ?>
+            <div class="load-more-wrap" style="margin-top:12px;text-align:center">
+              <button id="loadMoreReservations" class="btn" data-url="<?= base_path('/user/reservasi_list_ajax.php') ?>" data-offset="20">Muat Lagi</button>
+            </div>
+          <?php endif; ?>
+        <?php else: ?>
+          <div class="no-data">
+            <p>📭 Belum ada reservasi. Mulai dengan membuat reservasi baru.</p>
+          </div>
+        <?php endif; ?>
+      </section>
+    </div>
+
+<?php 
+$page_content = ob_get_clean();
+require __DIR__ . '/../templates/layout-user-admin.php'; 
+?>
